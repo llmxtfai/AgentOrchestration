@@ -1,5 +1,6 @@
 """Metrics collection and reporting."""
 
+import copy
 import time
 from collections import defaultdict
 from typing import Dict, List
@@ -40,12 +41,13 @@ class MetricsCollector:
 
     def snapshot(self) -> Dict:
         with self._lock:
-            return {
+            snapshot = {
                 "counters": dict(self._counters),
                 "gauges": dict(self._gauges),
                 "histograms": {k: {"count": len(v), "sum": sum(v), "avg": sum(v) / len(v) if v else 0}
                                for k, v in self._histograms.items()},
             }
+            return copy.deepcopy(snapshot)
 
 
 metrics = MetricsCollector()

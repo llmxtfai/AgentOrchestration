@@ -31,6 +31,18 @@ class TestMetricsCollector:
         duration = self.metrics.stop_timer("operation")
         assert duration > 0.005
 
+    def test_snapshot_is_independent_from_caller_mutation(self):
+        self.metrics.increment("requests.total")
+        self.metrics.observe("response.time", 1.0)
+
+        snapshot = self.metrics.snapshot()
+        snapshot["counters"]["requests.total"] = 999
+        snapshot["histograms"]["response.time"]["avg"] = 42.0
+
+        fresh_snapshot = self.metrics.snapshot()
+        assert fresh_snapshot["counters"]["requests.total"] == 1
+        assert fresh_snapshot["histograms"]["response.time"]["avg"] == 1.0
+
 # 2019-07-16T09:29:21 update
 
 # 2019-09-09T13:35:42 update
